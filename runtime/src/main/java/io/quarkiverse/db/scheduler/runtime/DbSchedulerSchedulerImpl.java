@@ -80,7 +80,6 @@ public class DbSchedulerSchedulerImpl extends BaseScheduler implements Scheduler
     private volatile boolean running;
 
     public DbSchedulerSchedulerImpl(SchedulerContext context,
-            DbSchedulerBuildTimeConfig buildTimeConfig,
             DbSchedulerRuntimeConfig dbSchedulerConfig,
             SchedulerRuntimeConfig schedulerRuntimeConfig,
             Instance<DataSource> dataSources,
@@ -183,7 +182,7 @@ public class DbSchedulerSchedulerImpl extends BaseScheduler implements Scheduler
                 .pollingInterval(dbSchedulerConfig.pollingInterval())
                 .heartbeatInterval(dbSchedulerConfig.heartbeatInterval())
                 .shutdownMaxWait(dbSchedulerConfig.shutdownMaxWait())
-                .tableName(buildTimeConfig.tableName());
+                .tableName(dbSchedulerConfig.tableName());
 
         for (RecurringTask<?> task : recurringTasks) {
             builder.startTasks(task);

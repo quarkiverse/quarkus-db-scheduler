@@ -46,4 +46,10 @@ public interface DbSchedulerRuntimeConfig {
      */
     @WithDefault("false")
     boolean alwaysPersistTimestampInUtc();
+
+    /**
+     * The name of the database table used by db-scheduler.
+     */
+    @WithDefault("scheduled_tasks")
+    String tableName();
 }
