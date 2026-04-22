@@ -38,6 +38,9 @@ import com.github.kagkarlsson.scheduler.task.schedule.CronStyle;
 import com.github.kagkarlsson.scheduler.task.schedule.FixedDelay;
 import com.github.kagkarlsson.scheduler.task.schedule.Schedule;
 
+import io.quarkus.agroal.DataSource.DataSourceLiteral;
+import io.quarkus.arc.Arc;
+import io.quarkus.arc.InstanceHandle;
 import io.quarkus.runtime.StartupEvent;
 import io.quarkus.scheduler.DelayedExecution;
 import io.quarkus.scheduler.FailedExecution;
@@ -82,7 +85,6 @@ public class DbSchedulerSchedulerImpl extends BaseScheduler implements Scheduler
     public DbSchedulerSchedulerImpl(SchedulerContext context,
             DbSchedulerRuntimeConfig dbSchedulerConfig,
             SchedulerRuntimeConfig schedulerRuntimeConfig,
-            Instance<DataSource> dataSources,
             Event<SkippedExecution> skippedExecutionEvent,
             Event<SuccessfulExecution> successExecutionEvent,
             Event<FailedExecution> failedExecutionEvent,
@@ -130,13 +132,7 @@ public class DbSchedulerSchedulerImpl extends BaseScheduler implements Scheduler
             return;
         }
 
-        if (!dataSources.isResolvable()) {
-            throw new IllegalStateException(
-                    "A datasource must be configured for db-scheduler. "
-                            + "Please add a JDBC driver extension (e.g. quarkus-jdbc-postgresql) "
-                            + "and configure quarkus.datasource.* properties.");
-        }
-        DataSource dataSource = dataSources.get();
+        DataSource dataSource = resolveDataSource(dbSchedulerConfig);
 
         CronType cronType = context.getCronType();
         List<RecurringTask<?>> recurringTasks = new ArrayList<>();
@@ -349,6 +345,24 @@ public class DbSchedulerSchedulerImpl extends BaseScheduler implements Scheduler
             running = false;
             dbScheduler.stop();
         }
+    }
+
+    private static DataSource resolveDataSource(DbSchedulerRuntimeConfig config) {
+        String dataSourceName = config.datasource().orElse(null);
+        InstanceHandle<DataSource> instanceHandle;
+        if (dataSourceName != null) {
+            instanceHandle = Arc.container().instance(DataSource.class, new DataSourceLiteral(dataSourceName));
+        } else {
+            instanceHandle = Arc.container().instance(DataSource.class);
+        }
+        if (!instanceHandle.isAvailable()) {
+            String dsLabel = dataSourceName != null ? "'" + dataSourceName + "'" : "default";
+            throw new IllegalStateException(
+                    "The " + dsLabel + " datasource must be configured for db-scheduler. "
+                            + "Please add a JDBC driver extension (e.g. quarkus-jdbc-postgresql) "
+                            + "and configure quarkus.datasource.* properties.");
+        }
+        return instanceHandle.get();
     }
 
     private RecurringTask<Void> createRecurringTask(String identity, Schedule schedule,

@@ -1,6 +1,7 @@
 package io.quarkiverse.db.scheduler.runtime;
 
 import java.time.Duration;
+import java.util.Optional;
 
 import io.quarkus.runtime.annotations.ConfigPhase;
 import io.quarkus.runtime.annotations.ConfigRoot;
@@ -52,4 +53,11 @@ public interface DbSchedulerRuntimeConfig {
      */
     @WithDefault("scheduled_tasks")
     String tableName();
+
+    /**
+     * The name of the datasource to use.
+     * <p>
+     * If not specified, the default datasource is used.
+     */
+    Optional<String> datasource();
 }
