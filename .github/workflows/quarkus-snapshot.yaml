@@ -1,0 +1,21 @@
+name: "Quarkus ecosystem CI"
+on:
+  workflow_dispatch:
+  watch:
+    types: [started]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    uses: quarkiverse/.github/.github/workflows/quarkus-ecosystem-ci.yml@main
+    secrets: inherit
+    with:
+      ecosystem_ci_repo_path: quarkiverse-db-scheduler
+      java_version: 17

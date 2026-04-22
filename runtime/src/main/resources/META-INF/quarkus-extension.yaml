@@ -1,0 +1,11 @@
+name: Db Scheduler
+description: Persistent cluster-friendly scheduler using a single database table, integrating db-scheduler with quarkus-scheduler.
+metadata:
+  keywords:
+    - db-scheduler
+    - scheduler
+    - persistent
+    - cluster
+  categories:
+    - "miscellaneous"
+  status: "preview"

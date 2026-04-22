@@ -1,0 +1,219 @@
+= Quarkus Db Scheduler
+
+include::./includes/attributes.adoc[]
+
+A Quarkus extension that integrates https://github.com/kagkarlsson/db-scheduler[db-scheduler] with the Quarkus scheduler API.
+It provides persistent, cluster-friendly scheduling backed by a single database table.
+
+== Features
+
+* Full integration with `@Scheduled` annotations from `quarkus-scheduler`
+* Persistent task storage using a single database table
+* Cluster-safe execution -- only one node picks up a given task
+* Supports both cron expressions and fixed-interval schedules
+* Configurable polling interval, thread pool, and heartbeat
+* Pause and resume individual jobs or the entire scheduler
+* Access the underlying `com.github.kagkarlsson.scheduler.Scheduler` for advanced use cases
+
+== Installation
+
+Add the extension dependency to your project.
+You also need a JDBC driver extension (e.g. `quarkus-jdbc-postgresql`) and a configured datasource.
+
+[source,xml,subs=attributes+]
+----
+<dependency>
+    <groupId>io.quarkiverse.db-scheduler</groupId>
+    <artifactId>quarkus-db-scheduler</artifactId>
+    <version>{project-version}</version>
+</dependency>
+----
+
+== Database Setup
+
+db-scheduler requires a single table in your database. Create it before starting the application.
+
+=== PostgreSQL
+
+[source,sql]
+----
+create table scheduled_tasks (
+  task_name text not null,
+  task_instance text not null,
+  task_data bytea,
+  execution_time timestamp with time zone not null,
+  picked boolean not null,
+  picked_by text,
+  last_success timestamp with time zone,
+  last_failure timestamp with time zone,
+  consecutive_failures int,
+  last_heartbeat timestamp with time zone,
+  version bigint not null,
+  primary key (task_name, task_instance)
+);
+----
+
+=== MySQL / MariaDB
+
+[source,sql]
+----
+create table scheduled_tasks (
+  task_name varchar(100) not null,
+  task_instance varchar(100) not null,
+  task_data blob,
+  execution_time timestamp(6) not null,
+  picked bit(1) not null,
+  picked_by varchar(50),
+  last_success timestamp(6) null,
+  last_failure timestamp(6) null,
+  consecutive_failures int,
+  last_heartbeat timestamp(6) null,
+  version bigint not null,
+  primary key (task_name, task_instance)
+);
+----
+
+TIP: For MySQL and MariaDB, set `quarkus.db-scheduler.always-persist-timestamp-in-utc=true`.
+
+=== Oracle
+
+[source,sql]
+----
+create table scheduled_tasks (
+  task_name varchar2(100) not null,
+  task_instance varchar2(100) not null,
+  task_data blob,
+  execution_time timestamp with time zone not null,
+  picked number(1) not null,
+  picked_by varchar2(50),
+  last_success timestamp with time zone,
+  last_failure timestamp with time zone,
+  consecutive_failures number(10),
+  last_heartbeat timestamp with time zone,
+  version number(19) not null,
+  primary key (task_name, task_instance)
+);
+----
+
+DDL scripts for additional databases are available in the https://github.com/kagkarlsson/db-scheduler#database-schema[db-scheduler documentation].
+
+== Usage
+
+Use `@Scheduled` annotations exactly as you would with the built-in Quarkus scheduler.
+The extension automatically persists the schedules and ensures cluster-safe execution.
+
+=== Fixed-Interval Schedule
+
+[source,java]
+----
+import jakarta.enterprise.context.ApplicationScoped;
+import io.quarkus.scheduler.Scheduled;
+
+@ApplicationScoped
+public class MyJobs {
+
+    @Scheduled(every = "10s", identity = "my-recurring-job")
+    void everyTenSeconds() {
+        // persisted and cluster-safe
+    }
+}
+----
+
+=== Cron Schedule
+
+[source,java]
+----
+@ApplicationScoped
+public class MyJobs {
+
+    @Scheduled(cron = "0 0 12 * * ?", identity = "daily-noon")
+    void dailyAtNoon() {
+        // runs once per day across the cluster
+    }
+}
+----
+
+=== Accessing Execution Metadata
+
+[source,java]
+----
+@Scheduled(every = "30s", identity = "with-metadata")
+void withMetadata(ScheduledExecution execution) {
+    Instant fireTime = execution.getFireTime();
+    Trigger trigger = execution.getTrigger();
+    // ...
+}
+----
+
+== Advanced Usage
+
+=== Injecting the db-scheduler Scheduler
+
+For use cases not covered by `@Scheduled` (e.g. one-off tasks or programmatic scheduling), you can inject the underlying `com.github.kagkarlsson.scheduler.Scheduler` directly:
+
+[source,java]
+----
+import com.github.kagkarlsson.scheduler.Scheduler;
+
+@ApplicationScoped
+public class AdvancedScheduling {
+
+    @Inject
+    Scheduler dbScheduler;
+
+    public void scheduleOneOff() {
+        // use the db-scheduler API directly
+    }
+}
+----
+
+NOTE: The `Scheduler` bean is only available when at least one `@Scheduled` method exists, or when the start mode is set to `forced` via `quarkus.scheduler.start-mode=forced`.
+
+=== Pause and Resume
+
+You can pause and resume individual jobs or the entire scheduler using the `io.quarkus.scheduler.Scheduler` API:
+
+[source,java]
+----
+import io.quarkus.scheduler.Scheduler;
+
+@ApplicationScoped
+public class SchedulerControl {
+
+    @Inject
+    Scheduler scheduler;
+
+    public void pauseAll() {
+        scheduler.pause();
+    }
+
+    public void resumeAll() {
+        scheduler.resume();
+    }
+
+    public void pauseJob() {
+        scheduler.pause("my-recurring-job");
+    }
+
+    public void resumeJob() {
+        scheduler.resume("my-recurring-job");
+    }
+}
+----
+
+== Cluster Deployment
+
+db-scheduler is designed for clustered environments. When multiple application instances share the same database, only one instance will execute a given task at any time.
+
+Requirements for cluster operation:
+
+* All nodes must share the same database and `scheduled_tasks` table
+* All nodes must have reasonably synchronized clocks (NTP recommended)
+* All nodes should use the same polling interval
+
+No additional configuration is needed -- cluster-safe execution is the default behavior.
+
+[[extension-configuration-reference]]
+== Extension Configuration Reference
+
+include::includes/quarkus-db-scheduler.adoc[leveloffset=+1, opts=optional]

@@ -1,0 +1,177 @@
+[.configuration-legend]
+icon:lock[title=Fixed at build time] Configuration property fixed at build time - All other configuration properties are overridable at runtime
+[.configuration-reference.searchable, cols="80,.^10,.^10"]
+|===
+
+h|[.header-title]##Configuration property##
+h|Type
+h|Default
+
+a|icon:lock[title=Fixed at build time] [[quarkus-db-scheduler_quarkus-db-scheduler-table-name]] [.property-path]##link:#quarkus-db-scheduler_quarkus-db-scheduler-table-name[`+++quarkus.db-scheduler.table-name+++`]##
+ifdef::add-copy-button-to-config-props[]
+config_property_copy_button:+++quarkus.db-scheduler.table-name+++[]
+endif::add-copy-button-to-config-props[]
+
+
+[.description]
+--
+The name of the database table used by db-scheduler.
+
+
+ifdef::add-copy-button-to-env-var[]
+Environment variable: env_var_with_copy_button:+++QUARKUS_DB_SCHEDULER_TABLE_NAME+++[]
+endif::add-copy-button-to-env-var[]
+ifndef::add-copy-button-to-env-var[]
+Environment variable: `+++QUARKUS_DB_SCHEDULER_TABLE_NAME+++`
+endif::add-copy-button-to-env-var[]
+--
+|string
+|`+++scheduled_tasks+++`
+
+a| [[quarkus-db-scheduler_quarkus-db-scheduler-thread-count]] [.property-path]##link:#quarkus-db-scheduler_quarkus-db-scheduler-thread-count[`+++quarkus.db-scheduler.thread-count+++`]##
+ifdef::add-copy-button-to-config-props[]
+config_property_copy_button:+++quarkus.db-scheduler.thread-count+++[]
+endif::add-copy-button-to-config-props[]
+
+
+[.description]
+--
+Number of threads used by the scheduler.
+
+
+ifdef::add-copy-button-to-env-var[]
+Environment variable: env_var_with_copy_button:+++QUARKUS_DB_SCHEDULER_THREAD_COUNT+++[]
+endif::add-copy-button-to-env-var[]
+ifndef::add-copy-button-to-env-var[]
+Environment variable: `+++QUARKUS_DB_SCHEDULER_THREAD_COUNT+++`
+endif::add-copy-button-to-env-var[]
+--
+|int
+|`+++10+++`
+
+a| [[quarkus-db-scheduler_quarkus-db-scheduler-polling-interval]] [.property-path]##link:#quarkus-db-scheduler_quarkus-db-scheduler-polling-interval[`+++quarkus.db-scheduler.polling-interval+++`]##
+ifdef::add-copy-button-to-config-props[]
+config_property_copy_button:+++quarkus.db-scheduler.polling-interval+++[]
+endif::add-copy-button-to-config-props[]
+
+
+[.description]
+--
+How often the scheduler checks the database for due executions.
+
+
+ifdef::add-copy-button-to-env-var[]
+Environment variable: env_var_with_copy_button:+++QUARKUS_DB_SCHEDULER_POLLING_INTERVAL+++[]
+endif::add-copy-button-to-env-var[]
+ifndef::add-copy-button-to-env-var[]
+Environment variable: `+++QUARKUS_DB_SCHEDULER_POLLING_INTERVAL+++`
+endif::add-copy-button-to-env-var[]
+--
+|link:https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/Duration.html[Duration] link:#duration-note-anchor-quarkus-db-scheduler_quarkus-db-scheduler[icon:question-circle[title=More information about the Duration format]]
+|`+++10S+++`
+
+a| [[quarkus-db-scheduler_quarkus-db-scheduler-heartbeat-interval]] [.property-path]##link:#quarkus-db-scheduler_quarkus-db-scheduler-heartbeat-interval[`+++quarkus.db-scheduler.heartbeat-interval+++`]##
+ifdef::add-copy-button-to-config-props[]
+config_property_copy_button:+++quarkus.db-scheduler.heartbeat-interval+++[]
+endif::add-copy-button-to-config-props[]
+
+
+[.description]
+--
+How often the scheduler updates its heartbeat timestamp in the database.
+
+
+ifdef::add-copy-button-to-env-var[]
+Environment variable: env_var_with_copy_button:+++QUARKUS_DB_SCHEDULER_HEARTBEAT_INTERVAL+++[]
+endif::add-copy-button-to-env-var[]
+ifndef::add-copy-button-to-env-var[]
+Environment variable: `+++QUARKUS_DB_SCHEDULER_HEARTBEAT_INTERVAL+++`
+endif::add-copy-button-to-env-var[]
+--
+|link:https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/Duration.html[Duration] link:#duration-note-anchor-quarkus-db-scheduler_quarkus-db-scheduler[icon:question-circle[title=More information about the Duration format]]
+|`+++5M+++`
+
+a| [[quarkus-db-scheduler_quarkus-db-scheduler-shutdown-max-wait]] [.property-path]##link:#quarkus-db-scheduler_quarkus-db-scheduler-shutdown-max-wait[`+++quarkus.db-scheduler.shutdown-max-wait+++`]##
+ifdef::add-copy-button-to-config-props[]
+config_property_copy_button:+++quarkus.db-scheduler.shutdown-max-wait+++[]
+endif::add-copy-button-to-config-props[]
+
+
+[.description]
+--
+Maximum time to wait for running tasks to complete during shutdown.
+
+
+ifdef::add-copy-button-to-env-var[]
+Environment variable: env_var_with_copy_button:+++QUARKUS_DB_SCHEDULER_SHUTDOWN_MAX_WAIT+++[]
+endif::add-copy-button-to-env-var[]
+ifndef::add-copy-button-to-env-var[]
+Environment variable: `+++QUARKUS_DB_SCHEDULER_SHUTDOWN_MAX_WAIT+++`
+endif::add-copy-button-to-env-var[]
+--
+|link:https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/Duration.html[Duration] link:#duration-note-anchor-quarkus-db-scheduler_quarkus-db-scheduler[icon:question-circle[title=More information about the Duration format]]
+|`+++10S+++`
+
+a| [[quarkus-db-scheduler_quarkus-db-scheduler-enable-immediate-execution]] [.property-path]##link:#quarkus-db-scheduler_quarkus-db-scheduler-enable-immediate-execution[`+++quarkus.db-scheduler.enable-immediate-execution+++`]##
+ifdef::add-copy-button-to-config-props[]
+config_property_copy_button:+++quarkus.db-scheduler.enable-immediate-execution+++[]
+endif::add-copy-button-to-config-props[]
+
+
+[.description]
+--
+If set to `true`, the scheduler will trigger an immediate check for due executions when a task is scheduled.
+
+
+ifdef::add-copy-button-to-env-var[]
+Environment variable: env_var_with_copy_button:+++QUARKUS_DB_SCHEDULER_ENABLE_IMMEDIATE_EXECUTION+++[]
+endif::add-copy-button-to-env-var[]
+ifndef::add-copy-button-to-env-var[]
+Environment variable: `+++QUARKUS_DB_SCHEDULER_ENABLE_IMMEDIATE_EXECUTION+++`
+endif::add-copy-button-to-env-var[]
+--
+|boolean
+|`+++false+++`
+
+a| [[quarkus-db-scheduler_quarkus-db-scheduler-always-persist-timestamp-in-utc]] [.property-path]##link:#quarkus-db-scheduler_quarkus-db-scheduler-always-persist-timestamp-in-utc[`+++quarkus.db-scheduler.always-persist-timestamp-in-utc+++`]##
+ifdef::add-copy-button-to-config-props[]
+config_property_copy_button:+++quarkus.db-scheduler.always-persist-timestamp-in-utc+++[]
+endif::add-copy-button-to-config-props[]
+
+
+[.description]
+--
+Always persist timestamps in UTC. Recommended for MySQL and MariaDB.
+
+
+ifdef::add-copy-button-to-env-var[]
+Environment variable: env_var_with_copy_button:+++QUARKUS_DB_SCHEDULER_ALWAYS_PERSIST_TIMESTAMP_IN_UTC+++[]
+endif::add-copy-button-to-env-var[]
+ifndef::add-copy-button-to-env-var[]
+Environment variable: `+++QUARKUS_DB_SCHEDULER_ALWAYS_PERSIST_TIMESTAMP_IN_UTC+++`
+endif::add-copy-button-to-env-var[]
+--
+|boolean
+|`+++false+++`
+
+|===
+
+ifndef::no-duration-note[]
+[NOTE]
+[id=duration-note-anchor-quarkus-db-scheduler_quarkus-db-scheduler]
+.About the Duration format
+====
+To write duration values, use the standard `java.time.Duration` format.
+See the link:https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/Duration.html#parse(java.lang.CharSequence)[Duration#parse() Java API documentation] for more information.
+
+You can also use a simplified format, starting with a number:
+
+* If the value is only a number, it represents time in seconds.
+* If the value is a number followed by `ms`, it represents time in milliseconds.
+
+In other cases, the simplified format is translated to the `java.time.Duration` format for parsing:
+
+* If the value is a number followed by `h`, `m`, or `s`, it is prefixed with `PT`.
+* If the value is a number followed by `d`, it is prefixed with `P`.
+====
+endif::no-duration-note[]
