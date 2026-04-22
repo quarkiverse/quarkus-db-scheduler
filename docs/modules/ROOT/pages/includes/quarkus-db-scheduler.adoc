@@ -7,27 +7,6 @@ h|[.header-title]##Configuration property##
 h|Type
 h|Default
 
-a|icon:lock[title=Fixed at build time] [[quarkus-db-scheduler_quarkus-db-scheduler-table-name]] [.property-path]##link:#quarkus-db-scheduler_quarkus-db-scheduler-table-name[`+++quarkus.db-scheduler.table-name+++`]##
-ifdef::add-copy-button-to-config-props[]
-config_property_copy_button:+++quarkus.db-scheduler.table-name+++[]
-endif::add-copy-button-to-config-props[]
-
-
-[.description]
---
-The name of the database table used by db-scheduler.
-
-
-ifdef::add-copy-button-to-env-var[]
-Environment variable: env_var_with_copy_button:+++QUARKUS_DB_SCHEDULER_TABLE_NAME+++[]
-endif::add-copy-button-to-env-var[]
-ifndef::add-copy-button-to-env-var[]
-Environment variable: `+++QUARKUS_DB_SCHEDULER_TABLE_NAME+++`
-endif::add-copy-button-to-env-var[]
---
-|string
-|`+++scheduled_tasks+++`
-
 a| [[quarkus-db-scheduler_quarkus-db-scheduler-thread-count]] [.property-path]##link:#quarkus-db-scheduler_quarkus-db-scheduler-thread-count[`+++quarkus.db-scheduler.thread-count+++`]##
 ifdef::add-copy-button-to-config-props[]
 config_property_copy_button:+++quarkus.db-scheduler.thread-count+++[]
@@ -153,6 +132,50 @@ endif::add-copy-button-to-env-var[]
 --
 |boolean
 |`+++false+++`
+
+a| [[quarkus-db-scheduler_quarkus-db-scheduler-table-name]] [.property-path]##link:#quarkus-db-scheduler_quarkus-db-scheduler-table-name[`+++quarkus.db-scheduler.table-name+++`]##
+ifdef::add-copy-button-to-config-props[]
+config_property_copy_button:+++quarkus.db-scheduler.table-name+++[]
+endif::add-copy-button-to-config-props[]
+
+
+[.description]
+--
+The name of the database table used by db-scheduler.
+
+
+ifdef::add-copy-button-to-env-var[]
+Environment variable: env_var_with_copy_button:+++QUARKUS_DB_SCHEDULER_TABLE_NAME+++[]
+endif::add-copy-button-to-env-var[]
+ifndef::add-copy-button-to-env-var[]
+Environment variable: `+++QUARKUS_DB_SCHEDULER_TABLE_NAME+++`
+endif::add-copy-button-to-env-var[]
+--
+|string
+|`+++scheduled_tasks+++`
+
+a| [[quarkus-db-scheduler_quarkus-db-scheduler-datasource]] [.property-path]##link:#quarkus-db-scheduler_quarkus-db-scheduler-datasource[`+++quarkus.db-scheduler.datasource+++`]##
+ifdef::add-copy-button-to-config-props[]
+config_property_copy_button:+++quarkus.db-scheduler.datasource+++[]
+endif::add-copy-button-to-config-props[]
+
+
+[.description]
+--
+The name of the datasource to use.
+
+If not specified, the default datasource is used.
+
+
+ifdef::add-copy-button-to-env-var[]
+Environment variable: env_var_with_copy_button:+++QUARKUS_DB_SCHEDULER_DATASOURCE+++[]
+endif::add-copy-button-to-env-var[]
+ifndef::add-copy-button-to-env-var[]
+Environment variable: `+++QUARKUS_DB_SCHEDULER_DATASOURCE+++`
+endif::add-copy-button-to-env-var[]
+--
+|string
+|
 
 |===
 
