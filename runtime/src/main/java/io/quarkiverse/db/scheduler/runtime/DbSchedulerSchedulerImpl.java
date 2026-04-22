@@ -31,11 +31,11 @@ import jakarta.interceptor.Interceptor;
 import org.jboss.logging.Logger;
 
 import com.cronutils.model.CronType;
+import com.github.kagkarlsson.scheduler.task.ExecutionComplete;
 import com.github.kagkarlsson.scheduler.task.helper.RecurringTask;
 import com.github.kagkarlsson.scheduler.task.helper.Tasks;
 import com.github.kagkarlsson.scheduler.task.schedule.CronSchedule;
 import com.github.kagkarlsson.scheduler.task.schedule.CronStyle;
-import com.github.kagkarlsson.scheduler.task.schedule.FixedDelay;
 import com.github.kagkarlsson.scheduler.task.schedule.Schedule;
 
 import io.quarkus.agroal.DataSource.DataSourceLiteral;
@@ -401,7 +401,7 @@ public class DbSchedulerSchedulerImpl extends BaseScheduler implements Scheduler
             if (everyMillis.isEmpty()) {
                 return null;
             }
-            return FixedDelay.ofMillis(everyMillis.getAsLong());
+            return new FixedRate(Duration.ofMillis(everyMillis.getAsLong()));
         }
         throw new IllegalArgumentException("Invalid schedule configuration: " + scheduled);
     }
@@ -491,6 +491,36 @@ public class DbSchedulerSchedulerImpl extends BaseScheduler implements Scheduler
         @Override
         public Instant getScheduledFireTime() {
             return fireTime;
+        }
+    }
+
+    static class FixedRate implements Schedule {
+
+        private final Duration interval;
+
+        FixedRate(Duration interval) {
+            this.interval = interval;
+        }
+
+        @Override
+        public Instant getNextExecutionTime(ExecutionComplete executionComplete) {
+            Instant scheduledTime = executionComplete.getExecution().executionTime;
+            Instant next = scheduledTime.plus(interval);
+            Instant now = Instant.now();
+            if (next.isBefore(now)) {
+                next = now;
+            }
+            return next;
+        }
+
+        @Override
+        public Instant getInitialExecutionTime(Instant now) {
+            return now;
+        }
+
+        @Override
+        public boolean isDeterministic() {
+            return true;
         }
     }
 }
