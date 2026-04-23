@@ -13,6 +13,13 @@ import io.smallrye.config.WithDefault;
 public interface DbSchedulerRuntimeConfig {
 
     /**
+     * The name of the datasource to use.
+     * <p>
+     * If not specified, the default datasource is used.
+     */
+    Optional<String> datasource();
+
+    /**
      * Number of threads used by the scheduler.
      */
     @WithDefault("10")
@@ -53,11 +60,4 @@ public interface DbSchedulerRuntimeConfig {
      */
     @WithDefault("scheduled_tasks")
     String tableName();
-
-    /**
-     * The name of the datasource to use.
-     * <p>
-     * If not specified, the default datasource is used.
-     */
-    Optional<String> datasource();
 }
