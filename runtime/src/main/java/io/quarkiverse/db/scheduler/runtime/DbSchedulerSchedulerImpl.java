@@ -173,7 +173,7 @@ public class DbSchedulerSchedulerImpl extends BaseScheduler implements Scheduler
         }
 
         com.github.kagkarlsson.scheduler.SchedulerBuilder builder = com.github.kagkarlsson.scheduler.Scheduler
-                .create(dataSource, new ArrayList<>())
+                .create(dataSource, List.of())
                 .threads(dbSchedulerConfig.threadCount())
                 .pollingInterval(dbSchedulerConfig.pollingInterval())
                 .heartbeatInterval(dbSchedulerConfig.heartbeatInterval())

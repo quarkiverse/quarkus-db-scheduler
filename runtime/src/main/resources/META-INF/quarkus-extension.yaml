@@ -8,4 +8,5 @@ metadata:
     - cluster
   categories:
     - "miscellaneous"
+  lib-ga: com.github.kagkarlsson:db-scheduler[https://github.com/kagkarlsson/db-scheduler]
   status: "preview"
