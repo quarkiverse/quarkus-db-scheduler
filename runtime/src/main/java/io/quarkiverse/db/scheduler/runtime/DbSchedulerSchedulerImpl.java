@@ -79,7 +79,6 @@ public class DbSchedulerSchedulerImpl extends BaseScheduler implements Scheduler
     private final Map<String, DbSchedulerTrigger> scheduledTasks = new ConcurrentHashMap<>();
     private final Set<String> pausedJobs = ConcurrentHashMap.newKeySet();
     private final boolean startHalted;
-    private final Duration shutdownMaxWait;
     private volatile boolean running;
 
     public DbSchedulerSchedulerImpl(SchedulerContext context,
@@ -101,8 +100,6 @@ public class DbSchedulerSchedulerImpl extends BaseScheduler implements Scheduler
                 new Events(skippedExecutionEvent, successExecutionEvent, failedExecutionEvent, delayedExecutionEvent,
                         schedulerPausedEvent, schedulerResumedEvent, scheduledJobPausedEvent, scheduledJobResumedEvent),
                 jobInstrumenter, blockingExecutor);
-        this.shutdownMaxWait = dbSchedulerConfig.shutdownMaxWait();
-
         StartMode startMode = schedulerRuntimeConfig.startMode();
         boolean forceStart;
         if (startMode != StartMode.NORMAL) {
