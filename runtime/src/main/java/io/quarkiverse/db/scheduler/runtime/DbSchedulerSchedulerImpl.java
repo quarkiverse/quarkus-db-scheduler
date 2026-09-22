@@ -52,6 +52,7 @@ import io.quarkus.scheduler.Scheduler;
 import io.quarkus.scheduler.SchedulerPaused;
 import io.quarkus.scheduler.SchedulerResumed;
 import io.quarkus.scheduler.SkippedExecution;
+import io.quarkus.scheduler.StartedExecution;
 import io.quarkus.scheduler.SuccessfulExecution;
 import io.quarkus.scheduler.Trigger;
 import io.quarkus.scheduler.common.runtime.BaseScheduler;
@@ -87,6 +88,7 @@ public class DbSchedulerSchedulerImpl extends BaseScheduler implements Scheduler
             Event<SkippedExecution> skippedExecutionEvent,
             Event<SuccessfulExecution> successExecutionEvent,
             Event<FailedExecution> failedExecutionEvent,
+            Event<StartedExecution> startedExecutionEvent,
             Event<DelayedExecution> delayedExecutionEvent,
             Event<SchedulerPaused> schedulerPausedEvent,
             Event<SchedulerResumed> schedulerResumedEvent,
@@ -97,8 +99,9 @@ public class DbSchedulerSchedulerImpl extends BaseScheduler implements Scheduler
             Instance<JobInstrumenter> jobInstrumenter,
             ScheduledExecutorService blockingExecutor) {
         super(vertx, new CronParser(context.getCronType()), schedulerRuntimeConfig.overdueGracePeriod(),
-                new Events(skippedExecutionEvent, successExecutionEvent, failedExecutionEvent, delayedExecutionEvent,
-                        schedulerPausedEvent, schedulerResumedEvent, scheduledJobPausedEvent, scheduledJobResumedEvent),
+                new Events(skippedExecutionEvent, successExecutionEvent, failedExecutionEvent, startedExecutionEvent,
+                        delayedExecutionEvent, schedulerPausedEvent, schedulerResumedEvent, scheduledJobPausedEvent,
+                        scheduledJobResumedEvent),
                 jobInstrumenter, blockingExecutor);
         StartMode startMode = schedulerRuntimeConfig.startMode();
         boolean forceStart;
