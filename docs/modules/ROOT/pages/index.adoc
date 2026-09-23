@@ -14,6 +14,7 @@ It provides persistent, cluster-friendly scheduling backed by a single database 
 * Configurable polling interval, thread pool, and heartbeat
 * Pause and resume individual jobs or the entire scheduler
 * Access the underlying `com.github.kagkarlsson.scheduler.Scheduler` for advanced use cases
+* Run side by side with the in-memory Quarkus scheduler for jobs that should not be clustered
 
 == Installation
 
@@ -95,12 +96,20 @@ create table scheduled_tasks (
 );
 ----
 
+TIP: With https://quarkus.io/guides/databases-dev-services[Dev Services for Databases], you can create the table automatically in dev and test mode by putting the DDL in `src/main/resources/init.sql` and setting `quarkus.datasource.devservices.init-script-path=init.sql`.
+
+If you use a different table name, set `quarkus.db-scheduler.table-name` to match.
+
 DDL scripts for additional databases are available in the https://github.com/kagkarlsson/db-scheduler#database-schema[db-scheduler documentation].
 
 == Usage
 
 Use `@Scheduled` annotations exactly as you would with the built-in Quarkus scheduler.
 The extension automatically persists the schedules and ensures cluster-safe execution.
+
+IMPORTANT: The `identity` of a `@Scheduled` method is the db-scheduler task name stored in the `scheduled_tasks` table.
+Always set an explicit, stable `identity`.
+If you leave it out, a name is derived from the generated invoker class name, which can change when you refactor your code and leave orphaned rows in the table.
 
 === Fixed-Interval Schedule
 
@@ -137,6 +146,10 @@ public class MyJobs {
 
 [source,java]
 ----
+import java.time.Instant;
+import io.quarkus.scheduler.ScheduledExecution;
+import io.quarkus.scheduler.Trigger;
+
 @Scheduled(every = "30s", identity = "with-metadata")
 void withMetadata(ScheduledExecution execution) {
     Instant fireTime = execution.getFireTime();
@@ -144,6 +157,33 @@ void withMetadata(ScheduledExecution execution) {
     // ...
 }
 ----
+
+=== Supported `@Scheduled` Attributes
+
+[cols="1,3"]
+|===
+|Attribute |Support
+
+|`identity`
+|Supported. Used as the persisted task name. Property expressions such as `${my.job.id}` are resolved.
+
+|`cron`
+|Supported. The cron syntax follows `quarkus.scheduler.cron-type` (Quartz by default). Set the value to `off` or `disabled` to disable the job.
+
+|`timeZone`
+|Supported for cron schedules. Otherwise the system default time zone is used.
+
+|`every`
+|Supported as a fixed-rate schedule. The first execution runs as soon as the task is first registered. Set the value to `off` or `disabled` to disable the job.
+
+|`concurrentExecution`, `skipExecutionIf`, `executionMaxDelay`, `overdueGracePeriod`
+|Supported.
+
+|`delay`, `delayUnit`, `delayed`
+|Not supported and ignored.
+|===
+
+Execution events such as `SuccessfulExecution`, `FailedExecution` and `SkippedExecution` are fired just as they are with the built-in scheduler.
 
 == Advanced Usage
 
@@ -167,7 +207,7 @@ public class AdvancedScheduling {
 }
 ----
 
-NOTE: The `Scheduler` bean is only available when at least one `@Scheduled` method exists, or when the start mode is set to `forced` via `quarkus.scheduler.start-mode=forced`.
+NOTE: The db-scheduler `Scheduler` bean is only available when at least one `@Scheduled` method exists, or when the start mode is set to `forced` via `quarkus.scheduler.start-mode=forced`.
 
 === Pause and Resume
 
@@ -201,6 +241,94 @@ public class SchedulerControl {
 }
 ----
 
+WARNING: Pause state is held in memory on the node where you call `pause()`.
+It is not stored in the database, it is not shared with other nodes in the cluster, and it is lost on restart.
+The node that paused a job with `pause(identity)` still picks up that job, but completes it without running your method, so the next execution is scheduled normally.
+
+=== Programmatic Scheduling
+
+This extension does not support the `io.quarkus.scheduler.Scheduler#newJob()` and `unscheduleJob()` methods. Both throw `UnsupportedOperationException`.
+Instead, you can:
+
+* Inject the db-scheduler `Scheduler` and use its API for persistent, cluster-safe tasks, as shown above.
+* Enable the composite scheduler and create in-memory jobs with `newJob(...).setExecuteWith(Scheduled.SIMPLE)`, as described in <<non-clustered-jobs>>.
+
+=== Disabling or Halting the Scheduler
+
+The standard `quarkus-scheduler` configuration properties apply:
+
+* `quarkus.scheduler.enabled=false` disables the scheduler entirely.
+* `quarkus.scheduler.start-mode=forced` starts the scheduler even if no `@Scheduled` methods exist.
+* `quarkus.scheduler.start-mode=halted` creates the scheduler but does not start it. Call `Scheduler#resume()` to start it.
+
+[[non-clustered-jobs]]
+== Non-Clustered Jobs
+
+Not every job needs to be persisted and cluster-safe.
+Jobs such as cache refreshes, local metrics collection and other per-node housekeeping usually need to run on *every* node.
+Quarkus supports https://quarkus.io/guides/scheduler-reference#how-to-use-multiple-scheduler-implementations[multiple scheduler implementations] side by side.
+You can run those jobs on the in-memory scheduler from `quarkus-scheduler` while your other jobs use db-scheduler.
+
+By default, a single scheduler implementation runs all scheduled methods.
+db-scheduler has a higher priority than the in-memory `SIMPLE` implementation, so once you add this extension, db-scheduler runs every `@Scheduled` method.
+To keep both implementations running, enable the composite scheduler:
+
+[source,properties]
+----
+quarkus.scheduler.use-composite-scheduler=true
+----
+
+Then choose the implementation for each method with `@Scheduled#executeWith()`:
+
+[source,java]
+----
+import jakarta.enterprise.context.ApplicationScoped;
+import io.quarkus.scheduler.Scheduled;
+
+@ApplicationScoped
+public class MyJobs {
+
+    // Persisted and executed on a single node (db-scheduler is the default)
+    @Scheduled(cron = "0 0 12 * * ?", identity = "daily-noon")
+    void dailyAtNoon() {
+    }
+
+    // In-memory, runs on every node, nothing is written to the database
+    @Scheduled(every = "30s", identity = "refresh-local-cache", executeWith = Scheduled.SIMPLE)
+    void refreshLocalCache() {
+    }
+
+    // Explicitly select db-scheduler
+    @Scheduled(every = "5m", identity = "cleanup", executeWith = "db-scheduler")
+    void cleanup() {
+    }
+}
+----
+
+Methods that don't set `executeWith`, or that set it to `Scheduled.AUTO`, run on the implementation with the highest priority, which is db-scheduler.
+
+With the composite scheduler enabled, the injected `io.quarkus.scheduler.Scheduler` delegates to all implementations.
+Calls such as `pause()`, `resume()` and `getScheduledJobs()` therefore cover both kinds of jobs.
+You can also create in-memory jobs programmatically:
+
+[source,java]
+----
+@Inject
+io.quarkus.scheduler.Scheduler scheduler;
+
+void scheduleLocalJob() {
+    scheduler.newJob("local-job")
+            .setInterval("10s")
+            .setExecuteWith(Scheduled.SIMPLE)
+            .setTask(execution -> {
+                // runs in memory on this node only
+            })
+            .schedule();
+}
+----
+
+NOTE: If `quarkus.scheduler.use-composite-scheduler` is `false` (the default) and a method sets `executeWith = Scheduled.SIMPLE`, the build fails.
+
 == Cluster Deployment
 
 db-scheduler is designed for clustered environments. When multiple application instances share the same database, only one instance will execute a given task at any time.
@@ -210,6 +338,7 @@ Requirements for cluster operation:
 * All nodes must share the same database and `scheduled_tasks` table
 * All nodes must have reasonably synchronized clocks (NTP recommended)
 * All nodes should use the same polling interval
+* All nodes should use the same explicit `identity` values for their `@Scheduled` methods
 
 No additional configuration is needed -- cluster-safe execution is the default behavior.
 
