@@ -9,7 +9,7 @@
     </parent>
     <groupId>io.quarkiverse.db-scheduler</groupId>
     <artifactId>quarkus-db-scheduler-parent</artifactId>
-    <version>0.0.3</version>
+    <version>999-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Quarkus Db Scheduler - Parent</name>
 
@@ -22,7 +22,7 @@
         <connection>scm:git:git@github.com:quarkiverse/quarkus-db-scheduler.git</connection>
         <developerConnection>scm:git:git@github.com:quarkiverse/quarkus-db-scheduler.git</developerConnection>
         <url>https://github.com/quarkiverse/quarkus-db-scheduler</url>
-      <tag>0.0.3</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <properties>

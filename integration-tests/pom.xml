@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.quarkiverse.db-scheduler</groupId>
         <artifactId>quarkus-db-scheduler-parent</artifactId>
-        <version>0.0.3</version>
+        <version>999-SNAPSHOT</version>
     </parent>
     <artifactId>quarkus-db-scheduler-integration-tests</artifactId>
     <name>Quarkus Db Scheduler - Integration Tests</name>
