@@ -79,6 +79,15 @@ create table scheduled_tasks (
 > [!TIP]
 > In dev and test mode, Dev Services can create the table for you: put the DDL in `src/main/resources/init.sql` and set `quarkus.datasource.devservices.init-script-path=init.sql`.
 
+## Compatibility
+
+| Db Scheduler version | Quarkus version |
+| -------------------- | --------------- |
+| 0.0.x                | 3.39.3+         |
+| 4.x                  | 4.0.0+          |
+
+4.x targets Quarkus 4 and requires JDK 21. If you are still on Quarkus 3, stay on 0.0.x, which is maintained from the `0.x` branch.
+
 ## Usage
 
 Use `@Scheduled` as usual. Each job is persisted under its `identity` and runs on only one node in the cluster:
